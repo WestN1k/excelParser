@@ -1,3 +1,8 @@
-from django.contrib import admin
+from django.contrib.admin import register, ModelAdmin
 
-# Register your models here.
+from apps.upload_files.models import UploadFile
+
+
+@register(UploadFile)
+class UploadFileAdmin(ModelAdmin):
+    pass

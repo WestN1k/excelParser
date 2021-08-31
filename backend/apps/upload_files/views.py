@@ -21,7 +21,5 @@ class UploadViewSet(ReadOnlyModelViewSet):
     def upload(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data['file']:
-            serializer.save()
-            return Response({'file': 'has file'}, status=status.HTTP_200_OK)
-        return Response({'file': 'no file'}, status=status.HTTP_204_NO_CONTENT)
+        obj = serializer.save()
+        return Response({'file_id': obj.pk}, status=status.HTTP_200_OK)

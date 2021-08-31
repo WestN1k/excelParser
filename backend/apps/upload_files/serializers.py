@@ -1,15 +1,26 @@
-from django.utils.timezone import now
+from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer, FileField
 
 from apps.upload_files.models import UploadFile
-from apps.upload_files.services import process_excel_file
+from apps.upload_files.services import format_datetime
 from apps.upload_files.validators import file_validate
 
 
 class FileSerializer(ModelSerializer):
+    upload_date = SerializerMethodField()
+    finish_date = SerializerMethodField()
+
     class Meta:
         model = UploadFile
         fields = ('upload_date', 'finish_date', 'result', 'current_status')
+
+    @staticmethod
+    def get_upload_date(obj):
+        return format_datetime(obj.upload_date)
+
+    @staticmethod
+    def get_finish_date(obj):
+        return format_datetime(obj.finish_date)
 
 
 class FileUploadSerializer(ModelSerializer):
@@ -18,9 +29,3 @@ class FileUploadSerializer(ModelSerializer):
     class Meta:
         model = UploadFile
         fields = ('file',)
-
-    def create(self, validated_data):
-        file = validated_data['file']
-        result = process_excel_file(file)
-        finish_date = now()
-        return UploadFile.objects.create(result=result, finish_date=finish_date, **validated_data)

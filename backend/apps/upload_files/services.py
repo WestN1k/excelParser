@@ -1,29 +1,31 @@
+from datetime import datetime
 from io import BytesIO
+from typing import Iterable, Union
 
 from openpyxl import load_workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 from .constants import WORKBOOK_COLUMNS, FORMAT_DATETIME
 
 
-def get_value(ws, col_index):
+def get_value(ws: Worksheet, col_index: int) -> Iterable[str]:
     # Парсинг колонки
     for x in range(2, ws.max_row + 1):
         yield ws.cell(row=x, column=col_index).internal_value
 
 
-def process_excel_file(file):
+def process_excel_file(file) -> str:
     wb = load_workbook(filename=BytesIO(file.read()), data_only=True)
     columns = {}
     for sheet_name in wb.sheetnames:
         # формирование словаря с ключами before и after,
         # с заполнением данными из соответствующих им строк
-        headers = {
+        columns = {
             c.value: list(get_value(wb[sheet_name], c.col_idx))
             for c in next(wb[sheet_name].iter_rows(min_row=1, max_row=1))
             if c.value in WORKBOOK_COLUMNS
         }
-        if headers:
-            columns = headers
+        if columns:
             break
 
     # получение списка уникальных значений после вычитания значения строк
@@ -41,7 +43,7 @@ def process_excel_file(file):
     return status
 
 
-def format_datetime(date):
+def format_datetime(date: datetime) -> Union[str, None]:
     # Приводит дату в заданный формат для вывода
     if date:
         return date.strftime(FORMAT_DATETIME)

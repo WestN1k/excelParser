@@ -29,6 +29,7 @@ services:
     entrypoint: ./entrypoint.sh
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
+      - ./backend:/app
       - static:/app/static
       - media:/app/media
     env_file:
